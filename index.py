@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 import os
 import cgitb
 import cgi
@@ -52,11 +51,20 @@ if __name__ == '__main__':
 	print "Content-type: text/html"
 	print
 	print "<html>"
-	print "<head><title>Observations</title></head>"
+	print "<head>"
+	print "<title>Observations</title>"
+	print '<link rel="stylesheet" href="https://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.css" />'
+	print "</head>"
 	print "<body>"
+	print "<h1>%s %s %s</h1>" % ('a', 'b', 'c')
 	print "<h1>Observations</h1>"
 	print "<div>" + build_form(form) + "</div>"
-	print observations.generate_graph('M45', '2018-10-12 23:00:00', 'lapalma', 'div')
+	#print observations.generate_graph('M45', '2018-10-12 23:00:00', 'lapalma', 'div')
+	print '<div id="aladin-lite-div"></div>'
+	print '<script type="text/javascript" charset="utf_8" src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>'
+	print '<script type="text/javascript" charset="utf_8" src="https://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.js"></script>'
+	print '<script type="text/javascript">aladin = A.aladin("#aladin-lite-div", {survey: "P/DSS2/color", fov: 60,showReticle: true,showZoomControl: true, showFullScreenControl: true, showLayersControl: true, showGotoControl: true, showShareControl: true, fulscreen: true });</script>'
+
 	print "</body>"
 	print "</html>"
 
