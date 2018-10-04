@@ -1,7 +1,6 @@
-
+import plotly.offline as py
 import plotly.graph_objs as go
-from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
-init_notebook_mode(connected=True)
+
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
@@ -11,6 +10,8 @@ import astropy.units as u
 from astropy.time import Time
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 from astropy.coordinates import get_sun, get_moon
+
+
 
 # Ici on choisit l'objet
 # l'utilisateur pourrait avoir le choix:
@@ -74,7 +75,7 @@ moonaltazs_July12_to_13 = moon_July12_to_13.transform_to(frame_July12_to_13)
 layout = dict(autosize=False,
     width=1000,
     height=800,
-    margin=go.Margin(
+    margin=go.layout.Margin(
         l=150,
         r=50,
         b=75,
@@ -196,8 +197,8 @@ traces.append(go.Scatter(
 
 
 fig = go.Figure(data=traces, layout=layout)
+div_content = py.plot(fig, output_type='div')
 
-iplot(fig, filename='basic-line')
 
 
 
