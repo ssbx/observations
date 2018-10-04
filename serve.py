@@ -10,4 +10,5 @@ server_address = ("", 8000)
 handler.cgi_directories = ["/"]
 
 httpd = server(server_address, handler)
+print "http://localhost:8000";
 httpd.serve_forever()
