@@ -13,22 +13,18 @@ from astropy.coordinates import get_sun, get_moon
 
 
 
-def generate_graph(obj_name, date, site, out_type):
-	# Ici on choisit l'objet
-	# l'utilisateur pourrait avoir le choix:
-	# 1) mettre les coordonnees RA,Dec
-	# 2) donner le nom (comme dans l'exemple ci dessous) et laisser astropy trouver les coordonnees sur internet
-	target = SkyCoord.from_name(obj_name)
-	
+def generate_graph(target, date, site, out_type):
 	
 	# Menu deroulant pour choisir l'observatoire parmis toute la liste que donne astropy:
 	from astropy.coordinates import EarthLocation
 	EarthLocation.get_site_names()
 	# ici comme exemple j'ai choisi La Palma
 	observatory = EarthLocation.of_site(site)
-	# ici il faut donner la difference d'heure entre le fuseau de l'observatoire et le fuseau UTC (qui est a zero par definition)
+	# ici il faut donner la difference d'heure entre le fuseau de l'observatoire et le fuseau UTC 
+	# (qui est a zero par definition)
 	# la je le fais a la main, mais bien sur ca sera faut pour chaque observatoire...
-	# idealement il faudrait utiliser le package pytz, pour determiner la difference d'heure a partir des coordonnees (lat,long) de l'observatoire qui sont dans la variable "observatory"
+	# idealement il faudrait utiliser le package pytz, pour determiner la difference d'heure a partir des 
+	# coordonnees (lat,long) de l'observatoire qui sont dans la variable "observatory"
 	utcoffset = 0*u.hour  
 	
 	# date au hasard: dans l'interface offrir un calendrier pour la date
@@ -196,4 +192,10 @@ def generate_graph(obj_name, date, site, out_type):
 	return div_content
 
 if __name__ == '__main__':
-	generate_graph('M45', '2018-10-12 23:00:00', 'lapalma', 'file');
+	# Ici on choisit l'objet
+	# l'utilisateur pourrait avoir le choix:
+	# 1) mettre les coordonnees RA,Dec
+	# 2) donner le nom (comme dans l'exemple ci dessous) et laisser astropy trouver les coordonnees sur internet
+	target = SkyCoord.from_name('M45')
+
+	generate_graph(target, '2018-10-12 23:00:00', 'lapalma', 'file');
