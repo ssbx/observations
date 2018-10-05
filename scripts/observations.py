@@ -1,19 +1,29 @@
-import plotly.offline as py
-import plotly.graph_objs as go
+""" 
+Observations blablabla 
 
-import numpy as np
-import matplotlib.pyplot as plt
-from astropy.visualization import astropy_mpl_style
+Herve Bouy
+
+"""
+
+import astropy.units 		as u
+import cgi
+import json
+import matplotlib.pyplot 	as plt
+import numpy 				as np
+import plotly.offline 		as py
+import plotly.graph_objs 	as go
+import sys
+
+from astropy.coordinates 	import SkyCoord, EarthLocation, AltAz
+from astropy.coordinates 	import get_sun, get_moon
+from astropy.time 			import Time
+from astropy.visualization 	import astropy_mpl_style
+
 plt.style.use(astropy_mpl_style)
 
-import astropy.units as u
-from astropy.time import Time
-from astropy.coordinates import SkyCoord, EarthLocation, AltAz
-from astropy.coordinates import get_sun, get_moon
-
-
-
 def generate_graph(target, date, site, out_type):
+
+	""" Our main function. Is currently called either from a WSGI application, or manyaly """
 	
 	# Menu deroulant pour choisir l'observatoire parmis toute la liste que donne astropy:
 	from astropy.coordinates import EarthLocation
@@ -192,6 +202,8 @@ def generate_graph(target, date, site, out_type):
 	return div_content
 
 if __name__ == '__main__':
+
+	""" This one if only triggered if the script is launched from the command line """
 	# Ici on choisit l'objet
 	# l'utilisateur pourrait avoir le choix:
 	# 1) mettre les coordonnees RA,Dec
@@ -199,3 +211,29 @@ if __name__ == '__main__':
 	target = SkyCoord.from_name('M45')
 
 	generate_graph(target, '2018-10-12 23:00:00', 'lapalma', 'file');
+
+
+def application(environ, start_response):
+
+	""" This is the function called from the web server in a WSGI environment """
+
+	try:
+		request_body_size = int(environ.get('CONTENT_LENGTH', 0))
+	except (ValueError):
+		request_body_size = 0
+
+	request_body = environ['wsgi.input'].read(request_body_size)
+	req_data = cgi.parse_qs(request_body)
+
+	print >> sys.stderr, req_data.get('other')
+
+	target = SkyCoord.from_name('M45')
+	graph_data = generate_graph(target, '2018-10-12 23:00:00', 'lapalma', 'div');
+	rep = json.dumps({'lat': target.ra.degree, 'lon': target.dec.degree, 'div': graph_data})    
+	status = '200 OK'
+	response_headers = [
+		('Content-type', 'application/json'),
+		('Content-Length', str(len(rep)))
+	]
+	start_response('200 OK', response_headers)
+	return [rep]
