@@ -10,6 +10,7 @@ import cgi
 import json
 import matplotlib.pyplot 	as plt
 import numpy 				as np
+import os
 import plotly.offline 		as py
 import plotly.graph_objs 	as go
 import sys
@@ -214,6 +215,11 @@ if __name__ == '__main__':
 def application(environ, start_response):
 
 	""" This is the function called from the web server in a WSGI environment """
+
+	os.environ.update({
+		'XDG_CONFIG_HOME': '/var/www/astropyconfig',
+		'XDG_CACHE_HOME':  '/var/www/astropycache'
+	})
 
 	try:
 		request_body_size = int(environ.get('CONTENT_LENGTH', 0))
