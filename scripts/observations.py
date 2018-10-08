@@ -18,16 +18,16 @@ from astropy.coordinates 	import SkyCoord, EarthLocation, AltAz
 from astropy.coordinates 	import get_sun, get_moon
 from astropy.time 			import Time
 from astropy.visualization 	import astropy_mpl_style
+from astropy.coordinates import EarthLocation
 
+EarthLocation.get_site_names()
 plt.style.use(astropy_mpl_style)
 
 def generate_graph(target, date, site, out_type):
 
-	""" Our main function. Is currently called either from a WSGI application, or manyaly """
+	""" Our main function. Is currently called either from a WSGI application, or from the command line """
 	
 	# Menu deroulant pour choisir l'observatoire parmis toute la liste que donne astropy:
-	from astropy.coordinates import EarthLocation
-	EarthLocation.get_site_names()
 	# ici comme exemple j'ai choisi La Palma
 	observatory = EarthLocation.of_site(site)
 	# ici il faut donner la difference d'heure entre le fuseau de l'observatoire et le fuseau UTC 
@@ -61,7 +61,6 @@ def generate_graph(target, date, site, out_type):
 	# Use  `~astropy.coordinates.get_sun` to find the location of the Sun at 1000
 	# evenly spaced times between noon on July 12 and noon on July 13:
 	
-	from astropy.coordinates import get_sun
 	delta_midnight = np.linspace(-12, 12, 1000)*u.hour
 	times_July12_to_13 = midnight + delta_midnight
 	frame_July12_to_13 = AltAz(obstime=times_July12_to_13, location=observatory)
@@ -72,21 +71,19 @@ def generate_graph(target, date, site, out_type):
 	# Do the same with `~astropy.coordinates.get_moon` to find when the moon is
 	# up. Be aware that this will need to download a 10MB file from the internet
 	# to get a precise location of the moon.
-	
-	from astropy.coordinates import get_moon
 	moon_July12_to_13 = get_moon(times_July12_to_13)
 	moonaltazs_July12_to_13 = moon_July12_to_13.transform_to(frame_July12_to_13)
 	
 	
 	# Edit the layout
-	layout = dict(autosize=False,
-		width=1000,
-		height=800,
+	layout = dict(autosize=True,
+		paper_bgcolor='rgba(0,0,0,0)',
+		height=500,
 		margin=go.layout.Margin(
-			l=150,
+			l=100,
 			r=50,
-			b=75,
-			t=50,
+			b=150,
+			t=40,
 			pad=4,
 		   ),
 		title = 'Visibility Chart',
@@ -204,6 +201,7 @@ def generate_graph(target, date, site, out_type):
 if __name__ == '__main__':
 
 	""" This one if only triggered if the script is launched from the command line """
+
 	# Ici on choisit l'objet
 	# l'utilisateur pourrait avoir le choix:
 	# 1) mettre les coordonnees RA,Dec
@@ -225,7 +223,7 @@ def application(environ, start_response):
 	request_body = environ['wsgi.input'].read(request_body_size)
 	req_data = cgi.parse_qs(request_body)
 
-	print >> sys.stderr, req_data.get('other')
+	#print >> sys.stderr, req_data.get('other')
 
 	target = SkyCoord.from_name('M45')
 	graph_data = generate_graph(target, '2018-10-12 23:00:00', 'lapalma', 'div');
