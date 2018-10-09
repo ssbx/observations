@@ -51,7 +51,6 @@
 			</div>
 		</nav>
 
-		<!-- Main jumbotron for a primary marketing message or call to action -->
 		<div class="jumbotron">
 			<div class="container">
 				<div class="row">
@@ -84,13 +83,11 @@
 		</div>
 
 		<div class="container">
-			<!-- Example row of columns -->
-
 				<div class="row">
 					<div id="graphdiv"></div>
 				</div>
 			<footer>
-				<p>&copy; 2016 Company, Inc.</p>
+				<p>Project Dance</p>
 			</footer>
 		</div> <!-- /container -->
 
@@ -166,6 +163,10 @@
 			type="text/javascript" 
 			charset="utf_8" 
 			src="https://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.js"></script>
+
+
+		<!-- Application script
+		================================================== -->
 		<script>
 			$(document).ready(function() {
 				aladin = A.aladin(
@@ -189,6 +190,7 @@
 					async: true, 
 					cache: false, 
 					success: function(data) {
+						console.log(data);
 						$.each(data, function(i,v) {
 							$('#siteInput').append('<option value="' + v + '">' + v + '</option>');
 						});
@@ -224,10 +226,10 @@
 						query: 	'draw', 
 						site: 	$('#siteInput').find(':selected').val(), 
 						target: $('#targetInput').val(),
-						date: 	$('#dateInput').text()
+						date: 	$('#dateInput').val()
 					},
 					async: true, 
-					cache: true, 
+					cache: false, 
 					success: function(data) {
 						console.log("have received data!!" + data['lat'] +  ' ' + data['lon']);
 						$('#graphdiv').html(data['div']);
