@@ -16,8 +16,7 @@ import plotly.offline 		as py
 import plotly.graph_objs 	as go
 import sys
 
-from astropy.coordinates 	import SkyCoord, EarthLocation, AltAz
-from astropy.coordinates 	import get_sun, get_moon
+from astropy.coordinates 	import SkyCoord, EarthLocation, AltAz, get_sun, get_moon
 from astropy.time 			import Time
 from astropy.visualization 	import astropy_mpl_style
 from astropy.coordinates import EarthLocation
@@ -30,7 +29,7 @@ from astropy.coordinates import EarthLocation
 #print '}'
 #
 
-# Sites hard coded
+# Sites hard coded, does not work well in WSGI environment
 sites = {
 	'ALMA': EarthLocation.from_geocentric(2225015.30883  * u.m, -5440016.418  * u.m ,-2481631.27428  * u.m),
 	'Anglo-Australian Observatory': EarthLocation.from_geocentric(-4680888.60272  * u.m, 2805218.44653  * u.m ,-3292788.08045  * u.m),
@@ -342,6 +341,13 @@ if __name__ == '__main__':
 
 	generate_graph(target, '2018-10-12 23:00:00', 'lapalma', 'file');
 
+def http_reply(status, message, start_response):
+	response_headers = [
+		('Content-type', 'application/json'),
+		('Content-Length', str(len(message)))]
+	start_response(status, response_headers)
+	return [message]
+
 
 def application(environ, start_response):
 
@@ -352,28 +358,38 @@ def application(environ, start_response):
 		#'XDG_CACHE_HOME':  '/var/www/astropycache'
 	#})
 
-
-
 	req_data = cgi.parse_qs(environ['QUERY_STRING'])
-	rep = status = None
-	if req_data.get('query'):
-		if req_data.get('query')[0] == 'getsites':
-			rep = json.dumps(sites.keys());
-			status = '200 OK'
-	else:
-		target = SkyCoord.from_name('M45')
-		graph_data = generate_graph(target, '2018-10-12 23:00:00', 'lapalma', 'div');
-		rep = json.dumps({'lat': target.ra.degree, 'lon': target.dec.degree, 'div': graph_data})    
-		status = '200 OK'
+
+	if req_data.get('query') and req_data.get('query')[0] == 'getsites':
+		return http_reply('200 OK', json.dumps(sorted(sites.keys())), start_response);
+
+	if req_data.get('query') and req_data.get('query')[0] == 'draw':
 
 
+		if not req_data.get('site'):
+			return http_reply('400 Bad Request (no site defined)', '', start_response)
 
-	response_headers = [
-		('Content-type', 'application/json'),
-		('Content-Length', str(len(rep)))
-	]
+		if not req_data.get('target'):
+			return http_reply('400 Bad Request (no target defined)', '', start_response)
 
-	start_response(status, response_headers)
-	return [rep]
+
+		req_site = req_data.get('site')[0]
+		str_target = req_data.get('target')[0]
+		if str_target.startswith('('):
+			str_target = str_target[1:-1]
+			str_coords = str_target.split(',')
+			req_target = SkyCoord(str_coords[0], str_coords[1], unit='deg')
+		else:
+			try:
+				req_target = SkyCoord.from_name(str_target)
+			except Exception: 
+				return http_reply('400 Bad Request (Unable to find object)', '', start_response)
+
+		graph_data = generate_graph(req_target, '2018-10-12 23:00:00', req_site, 'div');
+		rep = json.dumps({'lat': req_target.ra.degree, 'lon': req_target.dec.degree, 'div': graph_data})    
+		return http_reply('200 OK', rep, start_response);
+
+	return http_reply('400 Bad Request (unknonwn query)', '', start_response)
+
 
 
